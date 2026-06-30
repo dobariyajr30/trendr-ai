@@ -1,17 +1,8 @@
 from fastapi import APIRouter
 from services.ad_generator import generate_ad_copy_cached
-router = APIRouter()
+from services.trend_loader import load_trend_by_id
 
-# Temporary mock data — Vishakha's real trend JSONs will replace this later
-MOCK_TREND = {
-    "trend_name": "POV its Monday morning",
-    "audio": "Espresso - Sabrina Carpenter",
-    "hashtags": ["#MondayMood", "#CoffeeTime", "#Aesthetic"],
-    "description": "People doing their morning routine in a dreamy slow-mo style",
-    "engagement_score": 9.2,
-    "region": "IN",
-    "vertical_tags": ["food", "lifestyle", "wellness"]
-}
+router = APIRouter()
 
 MOCK_BUSINESS = {
     "name": "Brew & Co",
@@ -24,5 +15,9 @@ MOCK_BUSINESS = {
 
 @router.post("/generate-ad")
 def generate_ad(business_name: str, trend_id: str):
-    result = generate_ad_copy_cached(MOCK_TREND, MOCK_BUSINESS)
+    trend = load_trend_by_id(trend_id)
+    if trend is None:
+        return {"error": f"Trend '{trend_id}' not found"}
+
+    result = generate_ad_copy_cached(trend, MOCK_BUSINESS)
     return result
